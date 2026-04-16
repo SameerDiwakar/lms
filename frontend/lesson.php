@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../backend/db.php';
 
 $lesson_id = $_GET['id'];
@@ -57,43 +58,25 @@ if (!empty($lesson['video_url'])) {
     }
 }
 ?>
+<?php
+$user_id = $_SESSION['user_id'] ?? 0;
+
+$check = "SELECT * FROM progress WHERE user_id='$user_id' AND lesson_id='$lesson_id'";
+$result = $conn->query($check);
+
+if ($result->num_rows > 0) {
+    echo "<p style='color:green;'>✔ Completed</p>";
+} else {
+?>
+
+<form action="../backend/complete_lesson.php" method="POST">
+    <input type="hidden" name="lesson_id" value="<?php echo $lesson_id; ?>">
+    <button type="submit">Mark as Complete</button>
+</form>
+
+<?php } ?>
 
 <p><?php echo $lesson['content']; ?></p>
 
 </body>
 </html>
-
-
-<!-- <?php
-include '../backend/db.php'; -->
-
-$lesson_id = $_GET['id'];
-
-$sql = "SELECT * FROM lessons WHERE id='$lesson_id'";
-$lesson = $conn->query($sql)->fetch_assoc();
-?>
-
-<h2><?php echo $lesson['title']; ?></h2>
-
-<?php 
-if ($lesson['video_url']) {
-
-    $video_url = $lesson['video_url'];
-
-    // Extract video ID safely
-    parse_str(parse_url($video_url, PHP_URL_QUERY), $params);
-    $video_id = $params['v'] ?? '';
-
-    if ($video_id) {
-?>
-        <iframe width="600" height="300"
-            src="https://www.youtube.com/embed/<?php echo $video_id; ?>"
-            frameborder="0"
-            allowfullscreen>
-        </iframe>
-<?php 
-    }
-}
-?>
-
-<p><?php echo $lesson['content']; ?></p> -->

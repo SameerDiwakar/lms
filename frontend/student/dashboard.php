@@ -57,13 +57,13 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
 ?>
-
+<a href="course.php?id=<?php echo $row['id']; ?>">  
     <div class="course-card">
         <img src="../../uploads/<?php echo $row['thumbnail']; ?>">
         <h4><?php echo $row['title']; ?></h4>
         <p><?php echo substr($row['description'], 0, 80); ?>...</p>
     </div>
-
+</a>
 <?php
     }
 } else {
