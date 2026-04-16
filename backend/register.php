@@ -14,7 +14,11 @@ $sql = "INSERT INTO users (name, email, password, role)
         VALUES ('$name', '$email', '$hashed_password', '$role')";
 
 if ($conn->query($sql) === TRUE) {
-    echo "Registered successfully!";
+
+    // ✅ Redirect to login page
+    header("Location: ../frontend/login.html");
+    exit();
+
 } else {
     echo "Error: " . $conn->error;
 }
