@@ -48,9 +48,12 @@ if ($result->num_rows > 0) {
 ?>
 <a href="course.php?id=<?php echo $row['id']; ?>">  
     <div class="course-card">
-    <img src="../uploads/<?php echo $row['thumbnail']; ?>">
-    <h3><?php echo $row['title']; ?></h3>
-    <p><?php echo substr($row['description'], 0, 100); ?>...</p>
+
+    <a href="course.php?id=<?php echo $row['id']; ?>">
+        <img src="../uploads/<?php echo $row['thumbnail']; ?>">
+        <h3><?php echo $row['title']; ?></h3>
+        <p><?php echo substr($row['description'], 0, 100); ?>...</p>
+    </a>
 
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'student') { ?>
         
@@ -60,7 +63,6 @@ if ($result->num_rows > 0) {
         </form>
 
     <?php } ?>
-</a>
 
 </div>
 

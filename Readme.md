@@ -59,6 +59,10 @@ CREATE TABLE lessons (
     lesson_order INT
 );
 
+
+
+
+
 CREATE TABLE progress (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,

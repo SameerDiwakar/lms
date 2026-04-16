@@ -21,7 +21,7 @@ $course_id = $_GET['course_id'];
 
     <textarea name="content" placeholder="Lesson Content"></textarea><br><br>
 
-    <input type="number" name="lesson_order" placeholder="Lesson Order"><br><br>
+    <!-- ❌ REMOVE lesson_order input -->
 
     <button type="submit">Add Lesson</button>
 </form>

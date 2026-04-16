@@ -46,7 +46,11 @@ $result = $conn->query($sql);
     </style>
 </head>
 <body>
-
+<div style="background:#333; padding:10px;">
+    <a href="../index.php" style="color:white; margin-right:20px;">Home</a>
+    <a href="dashboard.php" style="color:white; margin-right:20px;">My Courses</a>
+    <a href="../../backend/logout.php" style="color:white;">Logout</a>
+</div>
 <h2>Welcome, <?php echo $_SESSION['name']; ?></h2>
 
 <h3>My Courses</h3>
@@ -57,8 +61,8 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
 ?>
-<a href="course.php?id=<?php echo $row['id']; ?>">  
-    <div class="course-card">
+<a href="../course.php?id=<?php echo $row['id']; ?>">
+        <div class="course-card">
         <img src="../../uploads/<?php echo $row['thumbnail']; ?>">
         <h4><?php echo $row['title']; ?></h4>
         <p><?php echo substr($row['description'], 0, 80); ?>...</p>
@@ -74,7 +78,7 @@ if ($result->num_rows > 0) {
 </div>
 
 <br>
-<a href="../../backend/logout.php">Logout</a>
+
 
 </body>
 </html>
