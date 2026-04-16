@@ -17,5 +17,14 @@ VALUES (
 
 $conn->query($sql);
 
-echo "Question added!";
+// 🔥 Get course_id
+$quiz_sql = "SELECT course_id FROM quizzes WHERE id='$quiz_id'";
+$res = $conn->query($quiz_sql);
+$data = $res->fetch_assoc();
+
+$course_id = $data['course_id'];
+
+// 🔥 Redirect back to same page
+header("Location: ../frontend/instructor/create_quiz.php?course_id=$course_id");
+exit();
 ?>

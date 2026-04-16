@@ -41,6 +41,10 @@ $lesson_sql = "SELECT * FROM lessons
                ORDER BY lesson_order ASC";
 
 $lessons = $conn->query($lesson_sql);
+
+// ✅ Get quiz (FIXED POSITION)
+$quiz_sql = "SELECT * FROM quizzes WHERE course_id='$course_id'";
+$quiz_result = $conn->query($quiz_sql);
 ?>
 
 <!DOCTYPE html>
@@ -65,6 +69,12 @@ $lessons = $conn->query($lesson_sql);
         .locked {
             color: red;
             font-weight: bold;
+        }
+
+        .quiz-box {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
@@ -107,6 +117,34 @@ $lessons = $conn->query($lesson_sql);
     <p class="locked">🔒 Please enroll to access lessons.</p>
 
 <?php } ?>
+
+
+<!-- 📝 QUIZ SECTION -->
+<h3>Quiz</h3>
+
+<div class="quiz-box">
+
+<?php if ($is_enrolled) { ?>
+
+    <?php if ($quiz_result->num_rows > 0) { 
+        $quiz = $quiz_result->fetch_assoc();
+    ?>
+
+        <a href="quiz.php?id=<?php echo $quiz['id']; ?>">
+            📝 Attempt Quiz
+        </a>
+
+    <?php } else { ?>
+        <p>No quiz available for this course.</p>
+    <?php } ?>
+
+<?php } else { ?>
+
+    <p class="locked">🔒 Enroll to access quiz.</p>
+
+<?php } ?>
+
+</div>
 
 <br>
 <a href="index.php">← Back to Courses</a>

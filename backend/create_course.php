@@ -23,7 +23,8 @@ $sql = "INSERT INTO courses (title, description, instructor_id, thumbnail)
         VALUES ('$title', '$description', '$instructor_id', '$thumbnail')";
 
 if ($conn->query($sql) === TRUE) {
-    echo "Course created successfully!";
+    header("Location: ../frontend/instructor/dashboard.php?quiz_id=$quiz_id");
+    exit();
 } else {
     echo "Error: " . $conn->error;
 }
