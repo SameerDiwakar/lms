@@ -52,7 +52,7 @@ include 'partials/header.php';
     </div>
   </div>
   <div class="hero-media">
-    <img src="assets/images/hero-learning.svg" alt="Learning platform illustration">
+    <img src="assets/images/hero-learning.jpg" alt="Keep learning hero image">
   </div>
 </section>
 

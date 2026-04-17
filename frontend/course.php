@@ -91,7 +91,7 @@ include 'partials/header.php';
     <?php } ?>
   </div>
   <div class="hero-media">
-    <img src="assets/images/hero-learning.svg" alt="Course overview illustration">
+    <img src="assets/images/hero-learning.jpg" alt="Keep learning hero image">
   </div>
 </section>
 
