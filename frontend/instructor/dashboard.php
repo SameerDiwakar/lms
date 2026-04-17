@@ -11,47 +11,91 @@ $instructor_id = $_SESSION['user_id'];
 
 $sql = "SELECT * FROM courses WHERE instructor_id='$instructor_id'";
 $result = $conn->query($sql);
+$courses = [];
+if ($result) {
+    while ($courseRow = $result->fetch_assoc()) {
+        $courses[] = $courseRow;
+    }
+}
+$courseTotal = count($courses);
+$lessonTotalResult = $conn->query("SELECT COUNT(*) AS total FROM lessons WHERE course_id IN (SELECT id FROM courses WHERE instructor_id='$instructor_id')");
+$quizTotalResult = $conn->query("SELECT COUNT(*) AS total FROM quizzes WHERE course_id IN (SELECT id FROM courses WHERE instructor_id='$instructor_id')");
+$lessonTotal = $lessonTotalResult ? (int) $lessonTotalResult->fetch_assoc()['total'] : 0;
+$quizTotal = $quizTotalResult ? (int) $quizTotalResult->fetch_assoc()['total'] : 0;
+
+$pageTitle = 'Instructor Dashboard';
+$cssPath = '../assets/styles.css';
+$scriptPath = '../assets/js/app.js';
+$brandHref = '../index.php';
+$showSearch = false;
+$navLinks = [
+    ['href' => 'dashboard.php', 'label' => 'My Courses'],
+    ['href' => '../../backend/logout.php', 'label' => 'Logout', 'class' => 'btn btn-secondary']
+];
+include '../partials/layout_start.php';
+include '../partials/header.php';
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instructor Dashboard</title>
-    <link rel="stylesheet" href="../assets/styles.css">
-</head>
-<body>
-<header class="app-header">
-  <div class="header-inner">
-    <div class="app-brand">LMS Portal</div>
-    <div class="search-container">
-      <input type="text" placeholder="Search courses..." class="search-input">
-      <button class="search-btn">🔍</button>
+<section class="hero-panel hero-layout">
+  <div>
+    <h2 class="page-title">Instructor Workspace</h2>
+    <p class="subheading">Welcome, <?php echo $_SESSION['name']; ?>. Manage your content, organize lessons, and keep quizzes ready for learners.</p>
+    <div class="hero-actions">
+      <a class="btn btn-success" href="create_course.php">Create New Course</a>
+      <a class="btn btn-secondary" href="../index.php">View Catalog</a>
     </div>
-    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    <nav class="app-nav" id="mobileNav">
-      <span class="welcome-text">Welcome, <?php echo $_SESSION['name']; ?></span>
-      <a href="dashboard.php">My Courses</a>
-      <a href="../../backend/logout.php" class="btn btn-secondary">Logout</a>
-    </nav>
   </div>
-</header>
-<div class="page-shell">
-<div class="container">
+  <div class="hero-media">
+    <img src="../assets/images/hero-dashboard.svg" alt="Instructor dashboard illustration">
+  </div>
+</section>
 
-<a class="btn btn-success" href="create_course.php">➕ Create New Course</a>
+<section class="stats-grid">
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $courseTotal; ?></div>
+    <div class="stat-label">Courses Owned</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $lessonTotal; ?></div>
+    <div class="stat-label">Lessons Published</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $quizTotal; ?></div>
+    <div class="stat-label">Quizzes Created</div>
+  </article>
+</section>
 
-<h3>My Courses</h3>
+<?php if ($courseTotal > 0) { ?>
+<section class="slider-shell">
+  <div class="slider-header">
+    <h3 class="section-heading">Course Management Slider</h3>
+    <div class="slider-nav">
+      <a href="#instructorSlider">Start</a>
+      <a href="#instructorCourses">Courses</a>
+    </div>
+  </div>
+  <div class="slider-track" id="instructorSlider">
+    <?php foreach ($courses as $courseCard) { ?>
+      <article class="slider-card">
+        <span class="label-pill">Manage</span>
+        <h4><?php echo htmlspecialchars($courseCard['title']); ?></h4>
+        <p><?php echo htmlspecialchars(substr($courseCard['description'], 0, 130)); ?>...</p>
+        <div class="feature-actions">
+          <a class="mini-btn" href="edit_course.php?id=<?php echo $courseCard['id']; ?>">Edit</a>
+          <a class="mini-btn" href="add_lesson.php?course_id=<?php echo $courseCard['id']; ?>">Lesson</a>
+        </div>
+      </article>
+    <?php } ?>
+  </div>
+</section>
+<?php } ?>
+
+<h3 id="instructorCourses" class="section-heading">My Courses</h3>
 
 <div class="course-container">
 
 <?php
-while($row = $result->fetch_assoc()) {
+foreach($courses as $row) {
 
     $course_id = $row['id'];
 
@@ -63,19 +107,24 @@ while($row = $result->fetch_assoc()) {
 ?>
 
 <div class="course-card">
-
-    <h4><?php echo $row['title']; ?></h4>
-
-    <!-- Buttons -->
-    <a class="btn" href="../course.php?id=<?php echo $course_id; ?>">View</a>
-    <a class="btn" href="edit_course.php?id=<?php echo $course_id; ?>">Edit</a>
-    <a class="btn" href="add_lesson.php?course_id=<?php echo $course_id; ?>">Add Lesson</a>
-    <a class="btn" href="create_quiz.php?course_id=<?php echo $course_id; ?>">Quiz</a>
-    <a class="btn btn-danger"
-    href="../../backend/delete_course.php?id=<?php echo $course_id; ?>"
-    onclick="return confirm('Delete this course? This will remove everything!')">
-    Delete Course
-    </a>
+    <div class="course-card-content">
+      <span class="label-pill">Course</span>
+      <h4 class="course-card-title"><?php echo $row['title']; ?></h4>
+      <p><?php echo htmlspecialchars(substr($row['description'], 0, 120)); ?>...</p>
+      <div class="feature-actions">
+        <a class="mini-btn" href="../course.php?id=<?php echo $course_id; ?>">View</a>
+        <a class="mini-btn" href="edit_course.php?id=<?php echo $course_id; ?>">Edit</a>
+        <a class="mini-btn" href="add_lesson.php?course_id=<?php echo $course_id; ?>">Add Lesson</a>
+        <a class="mini-btn" href="create_quiz.php?course_id=<?php echo $course_id; ?>">Quiz</a>
+      </div>
+    </div>
+    <div class="course-card-footer">
+      <a class="btn btn-danger"
+      href="../../backend/delete_course.php?id=<?php echo $course_id; ?>"
+      onclick="return confirm('Delete this course? This will remove everything!')">
+      Delete Course
+      </a>
+    </div>
 
     <!-- Quiz status -->
     <div class="quiz-status">
@@ -111,24 +160,8 @@ while($row = $result->fetch_assoc()) {
 
 <?php } ?>
 
-</div>
-</div>
+<?php if ($courseTotal === 0) { ?>
+  <p class="empty-note">No courses yet. Create your first course to start building content.</p>
+<?php } ?>
 
-<script>
-function toggleMobileMenu() {
-  const nav = document.getElementById('mobileNav');
-  nav.classList.toggle('active');
-}
-
-// Close mobile menu when clicking outside
-document.addEventListener('click', function(event) {
-  const nav = document.getElementById('mobileNav');
-  const toggle = document.querySelector('.mobile-menu-toggle');
-  
-  if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-    nav.classList.remove('active');
-  }
-});
-</script>
-</body>
-</html>
+<?php include '../partials/layout_end.php'; ?>

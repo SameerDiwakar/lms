@@ -15,81 +15,107 @@ $sql = "SELECT courses.* FROM courses
         WHERE enrollments.user_id = '$user_id'";
 
 $result = $conn->query($sql);
+$enrolledCourses = [];
+if ($result) {
+    while ($courseRow = $result->fetch_assoc()) {
+        $enrolledCourses[] = $courseRow;
+    }
+}
+$enrolledTotal = count($enrolledCourses);
+$completedLessonsResult = $conn->query("SELECT COUNT(*) AS total FROM progress WHERE user_id='$user_id'");
+$completedLessons = $completedLessonsResult ? (int) $completedLessonsResult->fetch_assoc()['total'] : 0;
+
+$pageTitle = 'Student Dashboard';
+$cssPath = '../assets/styles.css';
+$scriptPath = '../assets/js/app.js';
+$brandHref = '../index.php';
+$showSearch = false;
+$navLinks = [
+    ['href' => '../index.php', 'label' => 'Home'],
+    ['href' => 'dashboard.php', 'label' => 'My Courses'],
+    ['href' => '../../backend/logout.php', 'label' => 'Logout', 'class' => 'btn btn-secondary']
+];
+include '../partials/layout_start.php';
+include '../partials/header.php';
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-    <link rel="stylesheet" href="../assets/styles.css">
-</head>
-<body>
-<header class="app-header">
-  <div class="header-inner">
-    <div class="app-brand">LMS Portal</div>
-    <div class="search-container">
-      <input type="text" placeholder="Search courses..." class="search-input">
-      <button class="search-btn">🔍</button>
+<section class="hero-panel hero-layout">
+  <div>
+    <h2 class="page-title">Welcome, <?php echo $_SESSION['name']; ?></h2>
+    <p class="subheading">Track your active courses, continue lessons, and keep progress moving from one place.</p>
+    <div class="hero-actions">
+      <a class="btn" href="../index.php">Explore New Courses</a>
+      <a class="btn btn-secondary" href="dashboard.php">My Dashboard</a>
     </div>
-    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    <nav class="app-nav" id="mobileNav">
-      <a href="../index.php">Home</a>
-      <a href="dashboard.php">My Courses</a>
-      <a href="../../backend/logout.php" class="btn btn-secondary">Logout</a>
-    </nav>
   </div>
-</header>
-<div class="page-shell">
-<div class="container">
-<h2 class="page-title">Welcome, <?php echo $_SESSION['name']; ?></h2>
+  <div class="hero-media">
+    <img src="../assets/images/hero-dashboard.svg" alt="Student dashboard illustration">
+  </div>
+</section>
 
-<h3>My Courses</h3>
+<section class="stats-grid">
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $enrolledTotal; ?></div>
+    <div class="stat-label">Enrolled Courses</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $completedLessons; ?></div>
+    <div class="stat-label">Completed Lessons</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $enrolledTotal > 0 ? 'Active' : 'Start'; ?></div>
+    <div class="stat-label">Learning Status</div>
+  </article>
+</section>
+
+<?php if ($enrolledTotal > 0) { ?>
+<section class="slider-shell">
+  <div class="slider-header">
+    <h3 class="section-heading">Continue Learning Slider</h3>
+    <div class="slider-nav">
+      <a href="#studentSlider">Start</a>
+      <a href="#myCourses">Courses</a>
+    </div>
+  </div>
+  <div class="slider-track" id="studentSlider">
+    <?php foreach($enrolledCourses as $learningCard) { ?>
+      <article class="slider-card">
+        <span class="label-pill">In Progress</span>
+        <h4><?php echo htmlspecialchars($learningCard['title']); ?></h4>
+        <p><?php echo htmlspecialchars(substr($learningCard['description'], 0, 130)); ?>...</p>
+        <a class="mini-btn" href="../course.php?id=<?php echo $learningCard['id']; ?>">Resume</a>
+      </article>
+    <?php } ?>
+  </div>
+</section>
+<?php } ?>
+
+<h3 id="myCourses" class="section-heading">My Courses</h3>
 
 <div class="course-container">
 
 <?php
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
+if ($enrolledTotal > 0) {
+    foreach($enrolledCourses as $row) {
 ?>
 <a href="../course.php?id=<?php echo $row['id']; ?>">
-        <div class="course-card">
-        <img src="../../uploads/<?php echo $row['thumbnail']; ?>">
-        <h4><?php echo $row['title']; ?></h4>
+    <div class="course-card">
+      <div class="course-card-content">
+        <span class="label-pill">Enrolled</span>
+        <h4 class="course-card-title"><?php echo $row['title']; ?></h4>
         <p><?php echo substr($row['description'], 0, 80); ?>...</p>
+      </div>
+      <div class="course-card-footer">
+        <span class="status-pill">Continue Learning</span>
+      </div>
     </div>
 </a>
 <?php
     }
 } else {
-    echo "You have not enrolled in any courses yet.";
+    echo "<p class=\"empty-note\">You have not enrolled in any courses yet.</p>";
 }
 ?>
 
 </div>
 
-<br>
-
-<script>
-function toggleMobileMenu() {
-  const nav = document.getElementById('mobileNav');
-  nav.classList.toggle('active');
-}
-
-// Close mobile menu when clicking outside
-document.addEventListener('click', function(event) {
-  const nav = document.getElementById('mobileNav');
-  const toggle = document.querySelector('.mobile-menu-toggle');
-  
-  if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-    nav.classList.remove('active');
-  }
-});
-</script>
-</body>
-</html>
+<?php include '../partials/layout_end.php'; ?>

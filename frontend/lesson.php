@@ -12,42 +12,24 @@ if (!$result || $result->num_rows == 0) {
 }
 
 $lesson = $result->fetch_assoc();
-?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $lesson['title']; ?></title>
-    <link rel="stylesheet" href="assets/styles.css">
-</head>
-<body>
-<div class="page-shell">
-<div class="container">
-<header class="app-header">
-  <div class="header-inner">
-    <div class="app-brand">LMS Portal</div>
-    <div class="search-container">
-      <input type="text" placeholder="Search courses..." class="search-input">
-      <button class="search-btn">🔍</button>
-    </div>
-    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    <nav class="app-nav" id="mobileNav">
-      <a href="index.php">Courses</a>
-      <a href="course.php?id=<?php echo $lesson['course_id']; ?>">Back to Course</a>
-      <?php if (isset($_SESSION['user_id'])) { ?>
-        <a href="../backend/logout.php" class="btn btn-secondary">Logout</a>
-      <?php } else { ?>
-        <a href="login.html" class="btn">Login</a>
-      <?php } ?>
-    </nav>
-  </div>
-</header>
+$pageTitle = $lesson['title'];
+$cssPath = 'assets/styles.css';
+$scriptPath = 'assets/js/app.js';
+$brandHref = 'index.php';
+$showSearch = false;
+$navLinks = [
+    ['href' => 'index.php', 'label' => 'Courses'],
+    ['href' => 'course.php?id=' . $lesson['course_id'], 'label' => 'Back to Course']
+];
+if (isset($_SESSION['user_id'])) {
+    $navLinks[] = ['href' => '../backend/logout.php', 'label' => 'Logout', 'class' => 'btn btn-secondary'];
+} else {
+    $navLinks[] = ['href' => 'login.html', 'label' => 'Login', 'class' => 'btn'];
+}
+include 'partials/layout_start.php';
+include 'partials/header.php';
+?>
 
 <section class="card course-summary">
   <h1><?php echo $lesson['title']; ?></h1>
@@ -101,23 +83,4 @@ $lesson = $result->fetch_assoc();
     <p><?php echo nl2br(htmlspecialchars($lesson['content'])); ?></p>
   </div>
 </section>
-</div>
-</div>
-<script>
-function toggleMobileMenu() {
-  const nav = document.getElementById('mobileNav');
-  nav.classList.toggle('active');
-}
-
-// Close mobile menu when clicking outside
-document.addEventListener('click', function(event) {
-  const nav = document.getElementById('mobileNav');
-  const toggle = document.querySelector('.mobile-menu-toggle');
-  
-  if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-    nav.classList.remove('active');
-  }
-});
-</script>
-</body>
-</html>
+<?php include 'partials/layout_end.php'; ?>

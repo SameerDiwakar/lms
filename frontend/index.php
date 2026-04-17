@@ -4,54 +4,125 @@ session_start();
 
 $sql = "SELECT * FROM courses";
 $result = $conn->query($sql);
+$courses = [];
+while ($courseRow = $result->fetch_assoc()) {
+    $courses[] = $courseRow;
+}
+$totalCourses = count($courses);
+$lessonCountResult = $conn->query("SELECT COUNT(*) AS total FROM lessons");
+$quizCountResult = $conn->query("SELECT COUNT(*) AS total FROM quizzes");
+$totalLessons = $lessonCountResult ? (int) $lessonCountResult->fetch_assoc()['total'] : 0;
+$totalQuizzes = $quizCountResult ? (int) $quizCountResult->fetch_assoc()['total'] : 0;
+
+$pageTitle = 'LMS Home';
+$cssPath = 'assets/styles.css';
+$scriptPath = 'assets/js/app.js';
+$brandHref = 'index.php';
+$showSearch = true;
+$searchPlaceholder = 'Search courses...';
+$searchTarget = '.course-card';
+$searchFields = 'h3,p';
+$navLinks = [];
+if (isset($_SESSION['user_id'])) {
+    if ($_SESSION['role'] === 'student') {
+        $navLinks[] = ['href' => 'student/dashboard.php', 'label' => 'Dashboard'];
+    } elseif ($_SESSION['role'] === 'instructor') {
+        $navLinks[] = ['href' => 'instructor/dashboard.php', 'label' => 'Dashboard'];
+    } elseif ($_SESSION['role'] === 'admin') {
+        $navLinks[] = ['href' => 'admin/dashboard.php', 'label' => 'Dashboard'];
+    }
+    $navLinks[] = ['href' => '../backend/logout.php', 'label' => 'Logout', 'class' => 'btn btn-secondary'];
+} else {
+    $navLinks[] = ['href' => 'login.html', 'label' => 'Login'];
+    $navLinks[] = ['href' => 'register.html', 'label' => 'Register', 'class' => 'btn'];
+}
+
+include 'partials/layout_start.php';
+include 'partials/header.php';
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LMS Home</title>
-    <link rel="stylesheet" href="assets/styles.css">
-</head>
-<body>
-<div class="page-shell">
-<div class="container">
-
-<header class="app-header">
-  <div class="header-inner">
-    <div class="app-brand">LMS Portal</div>
-    <div class="search-container">
-      <input type="text" placeholder="Search courses..." class="search-input">
-      <button class="search-btn">🔍</button>
+<section class="hero-panel hero-layout">
+  <div>
+    <div class="label-pill">Discover</div>
+    <h1>Find the right course for your next milestone</h1>
+    <p class="subheading">Browse high-quality learning paths for students, instructors, and administrators with lessons, quizzes, and progress tracking.</p>
+    <div class="hero-actions">
+      <a class="btn" href="#courses">Browse Courses</a>
+      <a class="btn btn-secondary" href="login.html">Login</a>
     </div>
-    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    <nav class="app-nav" id="mobileNav">
-      <a href="login.html">Login</a>
-      <a href="register.html">Register</a>
-    </nav>
   </div>
-</header>
-
-<section class="hero-panel">
-  <div class="label-pill">Discover</div>
-  <h1>Find the right course for your next milestone</h1>
-  <p class="subheading">Browse high-quality learning paths for students, instructors, and administrators with lessons, quizzes, and progress tracking.</p>
-  <div class="hero-actions">
-    <a class="btn" href="#courses">Browse Courses</a>
-    <a class="btn btn-secondary" href="login.html">Login</a>
+  <div class="hero-media">
+    <img src="assets/images/hero-learning.svg" alt="Learning platform illustration">
   </div>
 </section>
+
+<section class="stats-grid">
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $totalCourses; ?></div>
+    <div class="stat-label">Published Courses</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $totalLessons; ?></div>
+    <div class="stat-label">Learning Lessons</div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-value"><?php echo $totalQuizzes; ?></div>
+    <div class="stat-label">Practice Quizzes</div>
+  </article>
+</section>
+
+<section class="feature-grid">
+  <article class="feature-card">
+    <h3>Fast Course Access</h3>
+    <p>Jump directly into any enrolled course in one click.</p>
+    <div class="feature-actions">
+      <a class="mini-btn" href="#courses">Explore</a>
+      <a class="mini-btn" href="login.html">Sign In</a>
+    </div>
+  </article>
+  <article class="feature-card">
+    <h3>Instructor Workspace</h3>
+    <p>Create lessons and quizzes from a clean dashboard flow.</p>
+    <div class="feature-actions">
+      <a class="mini-btn" href="register.html">Start Teaching</a>
+    </div>
+  </article>
+  <article class="feature-card">
+    <h3>Progress Tracking</h3>
+    <p>Track completion status and continue where you left off.</p>
+    <div class="feature-actions">
+      <a class="mini-btn" href="student/dashboard.php">Student View</a>
+    </div>
+  </article>
+</section>
+
+<?php if ($totalCourses > 0) { ?>
+<section class="slider-shell">
+  <div class="slider-header">
+    <h3 class="section-heading">Featured Tracks</h3>
+    <div class="slider-nav">
+      <a href="#featuredSlider">Start</a>
+      <a href="#courses">All</a>
+    </div>
+  </div>
+  <div class="slider-track" id="featuredSlider">
+    <?php foreach ($courses as $featured) { ?>
+      <article class="slider-card">
+        <span class="label-pill">Featured</span>
+        <h4><?php echo htmlspecialchars($featured['title']); ?></h4>
+        <p><?php echo htmlspecialchars(substr($featured['description'], 0, 130)); ?>...</p>
+        <a class="mini-btn" href="course.php?id=<?php echo $featured['id']; ?>">Open Course</a>
+      </article>
+    <?php } ?>
+  </div>
+</section>
+<?php } ?>
 
 <div id="courses" class="course-container">
 
 <?php
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
+if ($totalCourses > 0) {
+    foreach($courses as $row) {
 
         $user_id = $_SESSION['user_id'] ?? 0;
         $is_enrolled = false;
@@ -93,64 +164,10 @@ if ($result->num_rows > 0) {
 <?php
     }
 } else {
-    echo "No courses found";
+    echo "<p class=\"empty-note\">No courses found yet.</p>";
 }
 ?>
 
 </div>
-</div>
 
-<script>
-function toggleMobileMenu() {
-  const nav = document.getElementById('mobileNav');
-  nav.classList.toggle('active');
-}
-
-// Close mobile menu when clicking outside
-document.addEventListener('click', function(event) {
-  const nav = document.getElementById('mobileNav');
-  const toggle = document.querySelector('.mobile-menu-toggle');
-  
-  if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-    nav.classList.remove('active');
-  }
-});
-
-// Search functionality
-function performSearch() {
-  const searchInput = document.querySelector('.search-input');
-  const searchQuery = searchInput.value.trim().toLowerCase();
-  
-  if (searchQuery.length === 0) {
-    // Reset to show all courses
-    const courseCards = document.querySelectorAll('.course-card');
-    courseCards.forEach(card => {
-      card.style.display = 'flex';
-    });
-    return;
-  }
-  
-  // Filter courses based on search
-  const courseCards = document.querySelectorAll('.course-card');
-  courseCards.forEach(card => {
-    const title = card.querySelector('h3, h4').textContent.toLowerCase();
-    const description = card.querySelector('p').textContent.toLowerCase();
-    
-    if (title.includes(searchQuery) || description.includes(searchQuery)) {
-      card.style.display = 'flex';
-    } else {
-      card.style.display = 'none';
-    }
-  });
-}
-
-// Add search event listener
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.querySelector('.search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', performSearch);
-  }
-});
-</script>
-</body>
-</html>
+<?php include 'partials/layout_end.php'; ?>
