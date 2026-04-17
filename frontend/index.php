@@ -91,7 +91,15 @@ include 'partials/header.php';
     <h3>Progress Tracking</h3>
     <p>Track completion status and continue where you left off.</p>
     <div class="feature-actions">
-      <a class="mini-btn" href="student/dashboard.php">Student View</a>
+      <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'student') { ?>
+        <a class="mini-btn" href="student/dashboard.php">My Progress</a>
+      <?php } elseif (isset($_SESSION['user_id']) && $_SESSION['role'] === 'instructor') { ?>
+        <a class="mini-btn" href="instructor/dashboard.php">My Workspace</a>
+      <?php } elseif (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin') { ?>
+        <a class="mini-btn" href="admin/dashboard.php">Admin Panel</a>
+      <?php } else { ?>
+        <a class="mini-btn" href="login.html">Get Started</a>
+      <?php } ?>
     </div>
   </article>
 </section>

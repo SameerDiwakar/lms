@@ -46,7 +46,7 @@ include '../partials/header.php';
     </div>
   </div>
   <div class="hero-media">
-    <img src="../assets/images/hero-dashboard.svg" alt="Instructor dashboard illustration">
+    <img src="../assets/images/hero-learning.jpg" alt="Keep learning hero image">
   </div>
 </section>
 
